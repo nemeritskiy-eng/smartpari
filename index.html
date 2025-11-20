@@ -23,16 +23,63 @@
     </div>
 </div>
 
-<!-- Работа с контрактом -->
-<div class="section">
-    <h3>Contract</h3>
-    <div>
-        <input type="text" id="contract-address" placeholder="Contract address">
-        <button id="use-contract-btn">Use Existing Contract</button>
-        <button id="deploy-contract-btn">Deploy New Contract</button>
+<!-- Селектор сети -->
+<div class="network-selector">
+    <h3>🔗 Select Blockchain Network</h3>
+    <div id="network-options">
+        <div class="network-option" data-chain="0x38">
+            🟡 BNB Smart Chain (BSC)
+        </div>
+        <div class="network-option" data-chain="0x1">
+            🔷 Ethereum Mainnet
+        </div>
+        <div class="network-option" data-chain="0x61">
+            🧪 BSC Testnet
+        </div>
+        <div class="network-option" data-chain="0x89">
+            🟣 Polygon Mainnet
+        </div>
     </div>
-    <div id="current-contract">Current contract: None</div>
+
+    <div id="network-info" class="gas-info">
+        <p>Selected: <strong id="current-network">None</strong></p>
+        <p>Gas Price: <span id="current-gas-price">0</span> Gwei</p>
+        <p>Native Currency: <span id="native-currency">-</span></p>
+    </div>
+</div>
+
+<!-- Раздел деплоя -->
+<div class="deploy-section">
+    <h2>🔨 Deploy Smart Contract</h2>
+
+    <div class="contract-info">
+        <h4>📋 Contract Details</h4>
+        <p><strong>Network:</strong> <span id="deploy-network">BNB Smart Chain</span></p>
+        <p><strong>Estimated Cost:</strong> <span id="estimated-cost">~0.001 BNB</span></p>
+    </div>
+
+    <button id="deploy-contract-btn" class="deploy-button">
+        🚀 Deploy to BSC
+    </button>
+
+    <button id="switch-network-btn" style="display: none;">
+        🔄 Switch Network in MetaMask
+    </button>
+
     <div id="deploy-status"></div>
+</div>
+
+<!-- Информация о BSC -->
+<div class="bsc-info" style="background: #f0f8ff; padding: 15px; border-radius: 10px; margin: 20px 0;">
+    <h3>🟡 Why BNB Smart Chain?</h3>
+    <ul>
+        <li>✅ Low transaction fees (~$0.10-0.50)</li>
+        <li>✅ Fast block time (3 seconds)</li>
+        <li>✅ EVM compatible (same as Ethereum)</li>
+        <li>✅ Large ecosystem and liquidity</li>
+    </ul>
+    <p><small>Need BNB? Buy on <a href="https://binance.com" target="_blank">Binance</a> or use a bridge</small></p>
+</div>
 </div>
 
 <!-- Взаимодействие с контрактом -->
@@ -70,6 +117,7 @@
 <script src="./js/contractData.js"></script>
 <script src="./js/config.js"></script>
 <!-- Наш основной код -->
+<script src="./js/multi-chain-deployer.js"></script>
 <script src="./js/app.js"></script>
 </body>
 </html>
