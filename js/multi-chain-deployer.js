@@ -214,10 +214,10 @@ class MultiChainDeployer {
             statusDiv.innerHTML = `<p style="color: orange">🔄 Deploying to ${config.name}...</p>`;
 
             // Деплой контракта
-            const contract = new this.web3.eth.Contract(CONTRACT_ABI);
+            const contract = new this.web3.eth.Contract(contractABI);
 
             const gasEstimate = await contract.deploy({
-                data: CONTRACT_BYTECODE
+                data: contractBytecode
             }).estimateGas({
                 from: this.currentAccount
             });
@@ -225,7 +225,7 @@ class MultiChainDeployer {
             const gasPrice = await this.web3.eth.getGasPrice();
 
             const deployedContract = await contract.deploy({
-                data: CONTRACT_BYTECODE
+                data: contractBytecode
             }).send({
                 from: this.currentAccount,
                 gas: gasEstimate,
