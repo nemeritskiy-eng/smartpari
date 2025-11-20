@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Smart-Pari Agreement DApp</title>
+    <title>Multi-Party Agreement DApp</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
@@ -13,32 +13,62 @@
     </style>
 </head>
 <body>
-    <h1>SmartPary Agreement DApp</h1>
-    <button id="connectButton">Подключить MetaMask</button>
+<h1>Multi-Party Agreement DApp</h1>
 
-    <h3>Создать раунд (UserC)</h3>
-    <input type="text" id="userA" placeholder="Адрес UserA">
-    <input type="text" id="userB" placeholder="Адрес UserB">
-    <button id="startRoundButton">Создать раунд</button>
+<!-- Подключение кошелька -->
+<div class="section">
+    <button id="connect-wallet">Connect Wallet</button>
+    <div id="wallet-info" style="display: none;">
+        <p>Connected: <span id="wallet-address"></span></p>
+    </div>
+</div>
 
-    <h3>Внести депозит (UserA/UserB)</h3>
-    <input type="number" id="roundId" placeholder="ID раунда">
-    <input type="text" id="depositAmount" placeholder="Сумма в ETH">
-    <button id="depositButton">Внести депозит</button>
-
-    <h3>Статус раунда</h3>
-    <input type="number" id="statusRoundId" placeholder="ID раунда">
-    <button id="getStatusButton">Получить статус</button>
-    <div id="statusResult"></div>
-
-    <button id="deploy-contract-btn">Deploy New Contract</button>
+<!-- Работа с контрактом -->
+<div class="section">
+    <h3>Contract</h3>
+    <div>
+        <input type="text" id="contract-address" placeholder="Contract address">
+        <button id="use-contract-btn">Use Existing Contract</button>
+        <button id="deploy-contract-btn">Deploy New Contract</button>
+    </div>
+    <div id="current-contract">Current contract: None</div>
     <div id="deploy-status"></div>
+</div>
 
-    <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
-    <!-- Подключаем данные контракта -->
-    <script src="contractData.js"></script>
-    <!-- Наш основной код -->
-    <script src="app.js"></script>
+<!-- Взаимодействие с контрактом -->
+<div class="section">
+    <h3>Interact with Contract</h3>
 
+    <!-- Создание раунда -->
+    <div>
+        <h4>Start Round</h4>
+        <input type="text" id="userA" placeholder="User A Address">
+        <input type="text" id="userB" placeholder="User B Address">
+        <button id="start-round-btn">Start Round</button>
+    </div>
+
+    <!-- Депозит -->
+    <div>
+        <h4>Make Deposit</h4>
+        <input type="number" id="round-id" placeholder="Round ID">
+        <input type="number" id="deposit-amount" placeholder="Amount in ETH">
+        <button id="make-deposit-btn">Deposit</button>
+    </div>
+
+    <!-- Проверка статуса раунда -->
+    <div>
+        <h4>Check Round</h4>
+        <input type="number" id="check-round-id" placeholder="Round ID">
+        <button id="check-round-btn">Check Round</button>
+        <div id="round-details"></div>
+    </div>
+</div>
+
+<!-- Подключаем Web3 -->
+<script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+<!-- Подключаем данные контракта -->
+<script src="contractData.js"></script>
+<!-- Наш основной код -->
+<script src="app.js"></script>
 </body>
 </html>
