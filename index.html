@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Multi-Party Agreement</title>
+    <script src="https://cdn.jsdelivr.net/npm/web3@1.7.0/dist/web3.min.js"></script>
+</head>
+<body>
+    <button id="connectButton">Подключить MetaMask</button>
+    
+    <h3>Создать раунд (UserC)</h3>
+    <input type="text" id="userA" placeholder="Адрес UserA">
+    <input type="text" id="userB" placeholder="Адрес UserB">
+    <button id="startRoundButton">Создать раунд</button>
+
+    <h3>Внести депозит (UserA/UserB)</h3>
+    <input type="number" id="roundId" placeholder="ID раунда">
+    <input type="text" id="depositAmount" placeholder="Сумма в ETH">
+    <button id="depositButton">Внести депозит</button>
+
+    <h3>Статус раунда</h3>
+    <input type="number" id="statusRoundId" placeholder="ID раунда">
+    <button id="getStatusButton">Получить статус</button>
+    <div id="statusResult"></div>
+
+    <script>
+        // Здесь наш JavaScript код
+        let contract;
+        let web3;
+
+        // Подключение MetaMask
+        document.getElementById('connectButton').addEventListener('click', async () => {
+            if (window.ethereum) {
+                try {
+                    await window.ethereum.request({ method: 'eth_requestAccounts' });
+                    web3 = new Web3(window.ethereum);
+                    
+                    // ABI и адрес контракта
+                    const contractABI = [ /* ... */ ];
+                    const contractAddress = '0x...';
+                    
+                    contract = new web3.eth.Contract(contractABI, contractAddress);
+                    alert('MetaMask подключен!');
+                } catch (error) {
+                    console.error(error);
+                }
+            } else {
+                alert('Установите MetaMask!');
+            }
+        });
+
+        // Создание раунда
+        document.getElementById('startRoundButton').addEventListener('click', async () => {
+            const userA = document.getElementById('userA').value;
+            const userB = document.getElementById('userB').value;
+            
+            if (!contract) {
+                alert('Сначала подключите MetaMask');
+                return;
+            }
+            
+            try {
+                const accounts = await web3.eth.getAccounts();
+                const result = await contract.methods.startRound(userA, userB).send({
+                    from: accounts[0],
+                    gas: 300000
+                });
+                alert(`Раунд создан! ID: ${result.events.RoundStarted.returnValues.roundId}`);
+            } catch (error) {
+                console.error(error);
+                alert('Ошибка создания раунда: ' + error.message);
+            }
+        });
+
+        // Депозит
+        document.getElementById('depositButton').addEventListener('click', async () => {
+            const roundId = document.getElementById('roundId').value;
+            const amount = document.getElementById('depositAmount').value;
+            
+            if (!contract) {
+                alert('Сначала подключите MetaMask');
+                return;
+            }
+            
+            try {
+                const accounts = await web3.eth.getAccounts();
+                const amountWei = web3.utils.toWei(amount, 'ether');
+                
+                const result = await contract.methods.deposit(roundId).send({
+                    from: accounts[0],
+                    value: amountWei,
+                    gas: 200000
+                });
+                alert('Депозит успешен!');
+            } catch (error) {
+                console.error(error);
+                alert('Ошибка депозита: ' + error.message);
+            }
+        });
+
+        // Получение статуса
+        document.getElementById('getStatusButton').addEventListener('click', async () => {
+            const roundId = document.getElementById('statusRoundId').value;
+            
+            if (!contract) {
+                alert('Сначала подключите MetaMask');
+                return;
+            }
+            
+            try {
+                const status = await contract.methods.getRoundStatus(roundId).call();
+                const resultDiv = document.getElementById('statusResult');
+                resultDiv.innerHTML = `
+                    <p>UserA: ${status[0]}</p>
+                    <p>UserB: ${status[1]}</p>
+                    <p>UserC: ${status[2]}</p>
+                    <p>AmountA: ${web3.utils.fromWei(status[3], 'ether')} ETH</p>
+                    <p>AmountB: ${web3.utils.fromWei(status[4], 'ether')} ETH</p>
+                    <p>AmountC: ${web3.utils.fromWei(status[5], 'ether')} ETH</p>
+                    <p>Completed: ${status[6]}</p>
+                    <p>Refunded: ${status[7]}</p>
+                `;
+            } catch (error) {
+                console.error(error);
+                alert('Ошибка получения статуса: ' + error.message);
+            }
+        });
+    </script>
+</body>
+</html>
