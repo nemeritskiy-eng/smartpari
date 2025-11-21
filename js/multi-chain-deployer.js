@@ -230,11 +230,21 @@ class MultiChainDeployer {
             // Деплой контракта
             const contract = new this.web3.eth.Contract(contractABI);
 
-            const gasEstimate = await contract.deploy({
-                data: contractBytecode
-            }).estimateGas({
-                from: this.currentAccount
-            });
+            let gasEstimate;
+            try {
+                gasEstimate = await contract.deploy({
+                    data: contractBytecode
+                }).estimateGas({
+                    from: this.currentAccount
+                });
+                console.log('✅ Оценка газа успешна:', gasEstimate);
+            } catch (estimateError) {
+                console.error('❌ Ошибка оценки газа:', estimateError);
+                // Используем дефолтное значение для деплоя
+                gasEstimate = 2000000; // 2 million gas
+                console.log('🔄 Используем дефолтный лимит газа:', gasEstimate);
+            }
+
 
             const gasPrice = await this.web3.eth.getGasPrice();
             const retryGasPrice = (BigInt(gasPrice) * 200n) / 100n;
@@ -262,6 +272,11 @@ class MultiChainDeployer {
                     gasPriceGwei: this.web3.utils.fromWei(gasPrice, 'gwei')
 
                 });
+
+                if (Number(gasLimit) < 100000) {
+                   console.warn('⚠️ Лимит газа подозрительно низкий, устанавливаем минимальный порог');
+                   gasLimit = '2000000'; // Минимум 2 million для деплоя
+                }
 
                 console.log('⚡ Оптимизированные настройки газа:', {
                     retryGasPrice: retryGasPrice.toString(),
