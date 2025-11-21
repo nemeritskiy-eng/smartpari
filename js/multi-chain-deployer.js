@@ -248,7 +248,7 @@ class MultiChainDeployer {
 
             const gasPrice = await this.web3.eth.getGasPrice();
             const retryGasPrice = (BigInt(gasPrice) * 200n) / 100n;
-            const gasLimit = (BigInt(retryGasPrice) * 200n / 100n).toString();
+            const gasLimit = (BigInt(gasEstimate) * 200n / 100n).toString();
 
                     // Логируем данные контракта
                     console.log('📄 Данные контракта:', {
