@@ -240,12 +240,43 @@ class MultiChainDeployer {
             const retryGasPrice = (BigInt(gasPrice) * 200n) / 100n;
             const gasLimit = (BigInt(retryGasPrice) * 200n / 100n).toString();
 
+                    // Логируем данные контракта
+                    console.log('📄 Данные контракта:', {
+                        contractABI: {
+                            length: contractABI?.length,
+                            type: typeof contractABI,
+                            isArray: Array.isArray(contractABI)
+                        },
+                        contractBytecode: {
+                            length: contractBytecode?.length,
+                            startsWith: contractBytecode?.substring(0, 20) + '...',
+                            isValid: contractBytecode?.startsWith('0x')
+                        }
+                    });
+
+                // Логируем расчеты газа
+                console.log('🧮 Расчеты газа:', {
+                    originalGasEstimate: gasEstimate,
+                    originalGasPrice: gasPrice,
+                    gasPriceWei: gasPrice,
+                    gasPriceGwei: this.web3.utils.fromWei(gasPrice, 'gwei')
+
+                });
+
+                console.log('⚡ Оптимизированные настройки газа:', {
+                    retryGasPrice: retryGasPrice.toString(),
+                    retryGasPriceGwei: this.web3.utils.fromWei(retryGasPrice.toString(), 'gwei'),
+                    gasLimit: gasLimit,
+                    gasEstimate: gasEstimate.toString(),
+                    multiplier: '2.0x'
+                });
+
             const deployedContract = await contract.deploy({
                 data: contractBytecode
             }).send({
                 from: this.currentAccount,
                 gas: gasLimit,
-                gasPrice: retryGasPrice
+                gasPrice: retryGasPrice.toString()
             });
 
             await this.handleSuccessfulDeployment(deployedContract, config);
