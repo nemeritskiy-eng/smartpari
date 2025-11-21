@@ -229,21 +229,24 @@ class MultiChainDeployer {
 
             // Деплой контракта
             const contract = new this.web3.eth.Contract(contractABI);
-            contract.options.data = contractBytecode
-            const deployTx = contract.deploy()
 
+            const gasEstimate = await contract.deploy({
+                data: contractBytecode
+            }).estimateGas({
+                from: this.currentAccount
+            });
 
-            const deployedContract = await deployTx
-                .send({
-                  from: this.currentAccount,
-                  gas: await deployTx.estimateGas(),
-                })
-                .once("transactionHash", (txhash) => {
-                  console.log(`Mining deployment transaction ...`)
-                  console.log(`https://${network}.etherscan.io/tx/${txhash}`)
-                })
+            const gasPrice = await this.web3.eth.getGasPrice();
+            const retryGasPrice = (BigInt(gasPrice) * 200n) / 100n;
+            const gasLimit = (BigInt(retryGasPrice) * 200n / 100n).toString();
 
-            console.log(`Contract deployed at ${deployedContract.options.address}`)
+            const deployedContract = await contract.deploy({
+                data: contractBytecode
+            }).send({
+                from: this.currentAccount,
+                gas: gasLimit,
+                gasPrice: retryGasPrice
+            });
 
             await this.handleSuccessfulDeployment(deployedContract, config);
 
