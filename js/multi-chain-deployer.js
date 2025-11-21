@@ -97,11 +97,12 @@ class MultiChainDeployer {
 
         try {
             // Примерная оценка газа для деплоя
-            const estimatedGas = 2000000; // Типичный газ для деплоя
+            const estimatedGas = 3000000; // Типичный газ для деплоя
             const gasPrice = await this.web3.eth.getGasPrice();
+            const increasedGasPrice = Math.floor(Number(gasPrice) * 1.2).toString();
             const gasPriceGwei = this.web3.utils.fromWei(gasPrice, 'gwei');
 
-            const estimatedCostWei = estimatedGas * gasPrice;
+            const estimatedCostWei = estimatedGas * increasedGasPrice;
             const estimatedCostEth = this.web3.utils.fromWei(estimatedCostWei.toString(), 'ether');
 
             const config = NETWORK_CONFIGS[this.selectedChainId];
@@ -213,6 +214,20 @@ class MultiChainDeployer {
 
             statusDiv.innerHTML = `<p style="color: orange">🔄 Deploying to ${config.name}...</p>`;
 
+             // Проверяем наличие pending-транзакций
+             const pendingTxs = await this.checkPendingTransactions(this.currentAccount);
+             if (pendingTxs > 0) {
+                const shouldProceed = confirm(
+                'You have ${pendingTxs} pending transactions. ' +
+                'It is recommended to wait for them to be mined or cancel them. ' +
+                'Do you want to proceed anyway?'
+                );
+                if (!shouldProceed) {
+                    statusDiv.innerHTML = '<p style="color: red">Deployment cancelled due to pending transactions.</p>';
+                    return;
+                }
+             }
+
             // Деплой контракта
             const contract = new this.web3.eth.Contract(contractABI);
 
@@ -223,12 +238,13 @@ class MultiChainDeployer {
             });
 
             const gasPrice = await this.web3.eth.getGasPrice();
+            const gasLimit = Math.floor(gasEstimate * 1.2);
 
             const deployedContract = await contract.deploy({
                 data: contractBytecode
             }).send({
                 from: this.currentAccount,
-                gas: gasEstimate,
+                gas: gasLimit,
                 gasPrice: gasPrice
             });
 
@@ -236,6 +252,19 @@ class MultiChainDeployer {
 
         } catch (error) {
             this.handleDeploymentError(error);
+        }
+    }
+
+    // Функция для проверки pending-транзакций
+    async checkPendingTransactions(address) {
+        try {
+            const currentBlock = await this.web3.eth.getBlockNumber();
+            const pendingCount = await this.web3.eth.getTransactionCount(address, 'pending');
+            const latestCount = await this.web3.eth.getTransactionCount(address, 'latest');
+            return pendingCount - latestCount;
+        } catch (error) {
+            console.error('Error checking pending transactions:', error);
+            return 0;
         }
     }
 
@@ -293,29 +322,40 @@ class MultiChainDeployer {
         localStorage.setItem('deploymentHistory', JSON.stringify(history));
     }
 
-    handleDeploymentError(error) {
-        const statusDiv = document.getElementById('deploy-status');
+handleDeploymentError(error) {
+    const statusDiv = document.getElementById('deploy-status');
 
-        let errorMessage = error.message;
+    let errorMessage = error.message;
+    let transactionHash = null;
 
-        // Более понятные сообщения об ошибках
-        if (error.message.includes('insufficient funds')) {
-            const config = NETWORK_CONFIGS[this.selectedChainId];
-            errorMessage = `Insufficient ${config.symbol} for gas fees. Please fund your wallet.`;
-        } else if (error.message.includes('user denied')) {
-            errorMessage = 'Transaction was cancelled by user';
+    // Пытаемся извлечь хэш транзакции из ошибки, если есть
+    if (error.transactionHash) {
+        transactionHash = error.transactionHash;
+    } else if (error.message.includes('transactionHash')) {
+        const match = error.message.match(/transactionHash: (0x[a-fA-F0-9]{64})/);
+        if (match) {
+            transactionHash = match[1];
         }
+    }
 
-        statusDiv.innerHTML = `
-            <div style="color: red; background: #fff0f0; padding: 15px; border-radius: 5px;">
-                <h3>❌ Deployment Failed</h3>
-                <p>${errorMessage}</p>
-                ${this.selectedChainId === '0x38' ? `
-                    <p><small>Need BNB? You can get test BNB from the <a href="https://testnet.binance.org/faucet-smart" target="_blank">BSC Faucet</a> for testnet.</small></p>
-                ` : ''}
-            </div>
+    let errorHTML = `
+        <div style="color: red; background: #fff0f0; padding: 15px; border-radius: 5px;">
+            <h3>❌ Deployment Failed</h3>
+            <p>${errorMessage}</p>
+    `;
+
+    if (transactionHash) {
+        const config = NETWORK_CONFIGS[this.selectedChainId];
+        errorHTML += `
+            <p>Transaction Hash: ${transactionHash}</p>
+            <a href="${config.explorer}/tx/${transactionHash}" target="_blank">
+                View on Explorer
+            </a>
         `;
     }
+
+    errorHTML += `</div>`;
+    statusDiv.innerHTML = errorHTML;
 }
 
 // Вспомогательные функции
