@@ -99,10 +99,9 @@ class MultiChainDeployer {
             // Примерная оценка газа для деплоя
             const estimatedGas = 3000000; // Типичный газ для деплоя
             const gasPrice = await this.web3.eth.getGasPrice();
-            const increasedGasPrice = Math.floor(Number(gasPrice) * 1.2).toString();
             const gasPriceGwei = this.web3.utils.fromWei(gasPrice, 'gwei');
 
-            const estimatedCostWei = estimatedGas * increasedGasPrice;
+            const estimatedCostWei = estimatedGas * gasPrice;
             const estimatedCostEth = this.web3.utils.fromWei(estimatedCostWei.toString(), 'ether');
 
             const config = NETWORK_CONFIGS[this.selectedChainId];
@@ -238,7 +237,7 @@ class MultiChainDeployer {
             });
 
             const gasPrice = await this.web3.eth.getGasPrice();
-            const gasLimit = Math.floor(gasEstimate * 1.2);
+            const gasLimit = (BigInt(gasPrice) * 130n / 100n).toString();
 
             const deployedContract = await contract.deploy({
                 data: contractBytecode
