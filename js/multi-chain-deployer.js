@@ -294,6 +294,14 @@ class MultiChainDeployer {
                 gasPrice: retryGasPrice
             });
 
+                    console.log('✅ Транзакция отправлена успешно:', {
+                        transactionHash: deployedContract.transactionHash,
+                        contractAddress: deployedContract.options?.address,
+                        blockNumber: deployedContract.blockNumber,
+                        gasUsed: deployedContract.gasUsed
+                    });
+
+
             await this.handleSuccessfulDeployment(deployedContract, config);
 
         } catch (error) {
