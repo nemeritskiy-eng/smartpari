@@ -322,40 +322,48 @@ class MultiChainDeployer {
         localStorage.setItem('deploymentHistory', JSON.stringify(history));
     }
 
-handleDeploymentError(error) {
-    const statusDiv = document.getElementById('deploy-status');
+    handleDeploymentError(error) {
+        const statusDiv = document.getElementById('deploy-status');
 
-    let errorMessage = error.message;
-    let transactionHash = null;
+        let errorMessage = error.message;
+        let transactionHash = null;
 
-    // Пытаемся извлечь хэш транзакции из ошибки, если есть
-    if (error.transactionHash) {
-        transactionHash = error.transactionHash;
-    } else if (error.message.includes('transactionHash')) {
-        const match = error.message.match(/transactionHash: (0x[a-fA-F0-9]{64})/);
-        if (match) {
-            transactionHash = match[1];
+        // Пытаемся извлечь хэш транзакции из ошибки, если есть
+        if (error.transactionHash) {
+            transactionHash = error.transactionHash;
+        } else if (error.message.includes('transactionHash')) {
+            const match = error.message.match(/transactionHash: (0x[a-fA-F0-9]{64})/);
+            if (match) {
+                transactionHash = match[1];
+            }
         }
-    }
 
-    let errorHTML = `
-        <div style="color: red; background: #fff0f0; padding: 15px; border-radius: 5px;">
-            <h3>❌ Deployment Failed</h3>
-            <p>${errorMessage}</p>
-    `;
-
-    if (transactionHash) {
-        const config = NETWORK_CONFIGS[this.selectedChainId];
-        errorHTML += `
-            <p>Transaction Hash: ${transactionHash}</p>
-            <a href="${config.explorer}/tx/${transactionHash}" target="_blank">
-                View on Explorer
-            </a>
+        let errorHTML = `
+            <div style="color: red; background: #fff0f0; padding: 15px; border-radius: 5px;">
+                <h3>❌ Deployment Failed</h3>
+                <p>${errorMessage}</p>
         `;
-    }
 
-    errorHTML += `</div>`;
-    statusDiv.innerHTML = errorHTML;
+        if (transactionHash) {
+            const config = NETWORK_CONFIGS[this.selectedChainId];
+            errorHTML += `
+                <p>Transaction Hash: ${transactionHash}</p>
+                <a href="${config.explorer}/tx/${transactionHash}" target="_blank">
+                    View on Explorer
+                </a>
+            `;
+        }
+
+        errorHTML += `</div>`;
+        statusDiv.innerHTML = errorHTML;
+    }
+}
+
+// Вспомогательные функции
+function copyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(() => {
+        alert('Contract address copied to clipboard!');
+    });
 }
 
 // Инициализация при загрузке
@@ -364,10 +372,4 @@ document.addEventListener('DOMContentLoaded', function() {
     deployer = new MultiChainDeployer();
 });
 
-// Вспомогательные функции
-function copyToClipboard(text) {
-    navigator.clipboard.writeText(text).then(() => {
-        alert('Contract address copied to clipboard!');
-    });
-}
 
