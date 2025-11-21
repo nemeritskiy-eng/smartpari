@@ -33,7 +33,7 @@ window.addEventListener('load', async () => {
         const savedAddress = '0x6Fdd83A91A05035c4f4698A80599a51a687d7498';
         if (savedAddress) {
             currentContractAddress = savedAddress;
-            currentContractDiv.innerText = `Current contract: ${savedAddress}`;
+
             contractAddressInput.value = savedAddress;
         }
 
@@ -69,42 +69,6 @@ function updateWalletInfo() {
     walletInfoDiv.style.display = 'block';
     connectWalletBtn.style.display = 'none';
 }
-
-// Деплой нового контракта
-deployContractBtn.addEventListener('click', async () => {
-    if (!currentAccount) {
-        alert('Please connect wallet first');
-        return;
-    }
-
-    deployStatusDiv.innerHTML = 'Deploying...';
-
-    try {
-        const contract = new web3.eth.Contract(contractABI);
-        const deployTx = contract.deploy({
-            data: contractBytecode
-        });
-
-        const gasEstimate = await deployTx.estimateGas({ from: currentAccount });
-        const gasPrice = await web3.eth.getGasPrice();
-
-        const deployedContract = await deployTx.send({
-            from: currentAccount,
-            gas: gasEstimate,
-            gasPrice: gasPrice
-        });
-
-        currentContractAddress = deployedContract.options.address;
-        currentContractDiv.innerText = `Current contract: ${currentContractAddress}`;
-        contractAddressInput.value = currentContractAddress;
-        localStorage.setItem('contractAddress', currentContractAddress);
-
-        deployStatusDiv.innerHTML = `Contract deployed at: ${currentContractAddress}`;
-    } catch (error) {
-        console.error('Deployment error:', error);
-        deployStatusDiv.innerHTML = `Deployment failed: ${error.message}`;
-    }
-});
 
 // Запуск раунда
 startRoundBtn.addEventListener('click', async () => {
