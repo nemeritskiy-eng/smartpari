@@ -32,8 +32,7 @@ window.addEventListener('load', async () => {
     if (typeof window.ethereum !== 'undefined') {
         web3 = new Web3(window.ethereum);
 
-        // Проверяем, есть ли сохраненный адрес контракта
-        const savedAddress = localStorage.getItem('contractAddress');
+        const savedAddress = '0x6Fdd83A91A05035c4f4698A80599a51a687d7498';
         if (savedAddress) {
             currentContractAddress = savedAddress;
             currentContractDiv.innerText = `Current contract: ${savedAddress}`;
