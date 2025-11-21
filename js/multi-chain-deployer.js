@@ -291,7 +291,7 @@ class MultiChainDeployer {
             }).send({
                 from: this.currentAccount,
                 gas: gasLimit,
-                gasPrice: retryGasPrice.toString()
+                gasPrice: retryGasPrice
             });
 
             await this.handleSuccessfulDeployment(deployedContract, config);
