@@ -8,8 +8,6 @@ const connectWalletBtn = document.getElementById('connect-wallet');
 const walletInfoDiv = document.getElementById('wallet-info');
 const walletAddressSpan = document.getElementById('wallet-address');
 
-const useContractBtn = document.getElementById('use-contract-btn');
-const deployContractBtn = document.getElementById('deploy-contract-btn');
 const contractAddressInput = document.getElementById('contract-address');
 const currentContractDiv = document.getElementById('current-contract');
 const deployStatusDiv = document.getElementById('deploy-status');
@@ -71,18 +69,6 @@ function updateWalletInfo() {
     walletInfoDiv.style.display = 'block';
     connectWalletBtn.style.display = 'none';
 }
-
-// Использование существующего контракта
-useContractBtn.addEventListener('click', () => {
-    const address = contractAddressInput.value.trim();
-    if (web3.utils.isAddress(address)) {
-        currentContractAddress = address;
-        currentContractDiv.innerText = `Current contract: ${address}`;
-        localStorage.setItem('contractAddress', address);
-    } else {
-        alert('Invalid contract address');
-    }
-});
 
 // Деплой нового контракта
 deployContractBtn.addEventListener('click', async () => {
