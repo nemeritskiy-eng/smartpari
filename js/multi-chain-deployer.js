@@ -338,23 +338,23 @@ handleDeploymentError(error) {
         }
     }
 
-    let errorHTML = '
-            <div style="color: red; background: #fff0f0; padding: 15px; border-radius: 5px;">
+    let errorHTML = `
+        <div style="color: red; background: #fff0f0; padding: 15px; border-radius: 5px;">
             <h3>❌ Deployment Failed</h3>
             <p>${errorMessage}</p>
-    ';
+    `;
 
     if (transactionHash) {
         const config = NETWORK_CONFIGS[this.selectedChainId];
-        errorHTML += '
+        errorHTML += `
             <p>Transaction Hash: ${transactionHash}</p>
             <a href="${config.explorer}/tx/${transactionHash}" target="_blank">
                 View on Explorer
             </a>
-        ';
+        `;
     }
 
-    errorHTML += '</div>';
+    errorHTML += `</div>`;
     statusDiv.innerHTML = errorHTML;
 }
 
