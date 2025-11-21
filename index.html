@@ -48,6 +48,21 @@
     </div>
 </div>
 
+<div id="diagnostics-panel" style="display: none; background: #f8f9fa; padding: 20px; border-radius: 10px; margin: 20px 0;">
+    <h3>🩺 Диагностика транзакции</h3>
+    <div id="diagnostics-content">
+        <p>Запуск диагностики...</p>
+    </div>
+    <button onclick="runCompleteDiagnostics()" style="padding: 10px 15px; margin: 10px 5px;">
+        🔄 Перезапустить диагностику
+    </button>
+    <button onclick="fixCommonIssues()" style="padding: 10px 15px; margin: 10px 5px; background: #28a745; color: white; border: none;">
+        🛠️ Исправить автоматически
+    </button>
+</div>
+
+<div id="quick-fix-suggestions" style="display: none;"></div>
+
 <!-- Раздел деплоя -->
 <div class="deploy-section">
     <h2>🔨 Deploy Smart Contract</h2>
