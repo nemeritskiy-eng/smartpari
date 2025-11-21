@@ -237,7 +237,7 @@ class MultiChainDeployer {
             });
 
             const gasPrice = await this.web3.eth.getGasPrice();
-            const retryGasPrice = (BigInt(currentGasPrice) * 200n) / 100n;
+            const retryGasPrice = (BigInt(gasPrice) * 200n) / 100n;
             const gasLimit = (BigInt(retryGasPrice) * 200n / 100n).toString();
 
             const deployedContract = await contract.deploy({
