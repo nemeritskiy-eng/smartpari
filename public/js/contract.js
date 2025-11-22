@@ -96,14 +96,17 @@ class ContractManager {
         }
     }
 
-    async distributeRound(roundId) {
+    async distributeRound(roundId, amount) {
         if (!this.auth.requireRole(CONFIG.ROLES.JUDGE)) return false;
 
         try {
             this.showTransactionModal('Distributing round funds...');
 
-            await this.contract.methods.distribute(roundId).send({
+            const amountDistrWei = this.web3.utils.toWei(amount.toString(), 'ether');
+
+            await this.contract.methods.depositAndDistribute(roundId).send({
                 from: this.auth.currentAccount,
+                value: amountDistrWei,
                 gas: 300000
             });
 
@@ -115,6 +118,29 @@ class ContractManager {
             this.hideTransactionModal();
             console.error('Error distributing round:', error);
             this.auth.showError('Failed to distribute round: ' + error.message);
+            return false;
+        }
+    }
+
+    async refundWithFee(roundId) {
+        if (!this.auth.requireRole(CONFIG.ROLES.JUDGE)) return false;
+
+        try {
+            this.showTransactionModal('refundWithFee round funds...');
+
+            await this.contract.methods.refundWithFee(roundId).send({
+                from: this.auth.currentAccount,
+                gas: 300000
+            });
+
+            this.hideTransactionModal();
+            this.auth.showSuccess('Round refundWithFee successfully!');
+            return true;
+
+        } catch (error) {
+            this.hideTransactionModal();
+            console.error('Error refundWithFee round:', error);
+            this.auth.showError('Failed to refundWithFee round: ' + error.message);
             return false;
         }
     }

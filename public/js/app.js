@@ -58,9 +58,6 @@ class MultiPartyApp {
 
     setupEventListeners() {
         // Клиентские действия
-        document.getElementById('judge-start-round').addEventListener('click', () => {
-            this.handleStartRound();
-        });
 
         document.getElementById('client-make-deposit').addEventListener('click', () => {
             this.handleMakeDeposit();
@@ -69,6 +66,14 @@ class MultiPartyApp {
         // Действия судьи
         document.getElementById('judge-distribute').addEventListener('click', () => {
             this.handleDistributeRound();
+        });
+
+        document.getElementById('judge-start-round').addEventListener('click', () => {
+            this.handleStartRound();
+        });
+
+        document.getElementById('judge-refundWithFee').addEventListener('click', () => {
+            this.handleRefundWithFeeRound();
         });
 
         // Админские действия
@@ -300,9 +305,23 @@ class MultiPartyApp {
             return;
         }
 
-        const success = await this.contract.distributeRound(roundId);
+        const success = await this.contract.distributeRound(roundId, amount);
         if (success) {
             document.getElementById('judge-round-id').value = '';
+        }
+    }
+
+    async handleRefundWithFeeRound() {
+        const roundId = document.getElementById('judge-refundWithFee-round-id').value;
+
+        if (!roundId) {
+            this.auth.showError('Please enter round ID');
+            return;
+        }
+
+        const success = await this.contract.refundWithFee(roundId);
+        if (success) {
+            document.getElementById('judge-refundWithFee-round-id').value = '';
         }
     }
 

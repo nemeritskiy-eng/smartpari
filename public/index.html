@@ -131,8 +131,19 @@
                 <div class="form-group">
                     <label>Round ID:</label>
                     <input type="number" id="judge-round-id" placeholder="1" class="form-input">
+                    <label>Amount (BNB):</label>
+                    <input type="number" id="judge-deposit-amount" placeholder="0.000001" step="0.000001" class="form-input">
                 </div>
                 <button id="judge-distribute" class="btn-primary">Distribute Funds</button>
+            </section>
+
+            <section class="judge-section">
+                <h3>RefundWithFee Round</h3>
+                <div class="form-group">
+                    <label>Round ID:</label>
+                    <input type="number" id="judge-refundWithFee-round-id" placeholder="1" class="form-input">
+                </div>
+                <button id="judge-refundWithFee" class="btn-primary">RefundWithFee Funds</button>
             </section>
 
             <!-- История решений -->
