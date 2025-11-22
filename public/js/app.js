@@ -175,8 +175,3 @@ class MultiPartyApp {
         return this.auth.web3;
     }
 }
-
-let app;
-document.addEventListener('DOMContentLoaded', () => {
-    app = new MultiPartyApp();
-});
