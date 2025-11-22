@@ -58,7 +58,7 @@ class MultiPartyApp {
 
     setupEventListeners() {
         // Клиентские действия
-        document.getElementById('client-start-round').addEventListener('click', () => {
+        document.getElementById('judge-start-round').addEventListener('click', () => {
             this.handleStartRound();
         });
 
@@ -256,6 +256,7 @@ class MultiPartyApp {
     get web3() {
         return this.auth.web3;
     }
+
     // Обработчики действий
     async handleStartRound() {
         const userA = document.getElementById('client-userA').value.trim();
