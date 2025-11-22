@@ -1,4 +1,3 @@
-// js/auth.js
 class AuthManager {
     constructor() {
         this.web3 = null;
