@@ -32,7 +32,89 @@ class MultiPartyApp {
         console.log('🚀 Multi-Party Agreement Platform initialized');
     }
 
-    // ... остальные методы остаются такими же ...
+    setupNavigation() {
+        // Навигация по ссылкам
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const page = link.getAttribute('href').substring(1);
+                this.showPage(page);
+            });
+        });
+
+        // Кнопки на главной странице
+        document.querySelector('.goto-client').addEventListener('click', () => {
+            this.showPage('client');
+        });
+
+        document.querySelector('.goto-judge').addEventListener('click', () => {
+            this.showPage('judge');
+        });
+
+        document.querySelector('.goto-admin').addEventListener('click', () => {
+            this.showPage('admin');
+        });
+    }
+
+    setupEventListeners() {
+        // Клиентские действия
+        document.getElementById('client-start-round').addEventListener('click', () => {
+            this.handleStartRound();
+        });
+
+        document.getElementById('client-make-deposit').addEventListener('click', () => {
+            this.handleMakeDeposit();
+        });
+
+        // Действия судьи
+        document.getElementById('judge-distribute').addEventListener('click', () => {
+            this.handleDistributeRound();
+        });
+
+        // Админские действия
+        document.getElementById('admin-deploy-contract').addEventListener('click', () => {
+            this.handleDeployContract();
+        });
+
+        document.getElementById('admin-add-judge').addEventListener('click', () => {
+            this.handleAddJudge();
+        });
+
+        document.getElementById('admin-remove-judge').addEventListener('click', () => {
+            this.handleRemoveJudge();
+        });
+    }
+
+    showPage(pageName) {
+        // Скрываем все страницы
+        document.querySelectorAll('.page').forEach(page => {
+            page.classList.remove('active');
+        });
+
+        // Показываем выбранную страницу
+        const targetPage = document.getElementById(`${pageName}-page`);
+        if (targetPage) {
+            targetPage.classList.add('active');
+            this.currentPage = pageName;
+
+            // Обновляем навигацию
+            this.updateActiveNavLink(pageName);
+
+            // Загружаем данные для страницы
+            this.loadPageData(pageName);
+        }
+    }
+
+    updateActiveNavLink(pageName) {
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.classList.remove('active');
+        });
+
+        const activeLink = document.querySelector(`[href="#${pageName}"]`);
+        if (activeLink) {
+            activeLink.classList.add('active');
+        }
+    }
 
     async loadPageData(pageName) {
         switch (pageName) {
@@ -174,6 +256,79 @@ class MultiPartyApp {
     get web3() {
         return this.auth.web3;
     }
+    // Обработчики действий
+    async handleStartRound() {
+        const userA = document.getElementById('client-userA').value.trim();
+        const userB = document.getElementById('client-userB').value.trim();
+
+        if (!this.web3.utils.isAddress(userA) || !this.web3.utils.isAddress(userB)) {
+            this.auth.showError('Please enter valid Ethereum addresses');
+            return;
+        }
+
+        const roundId = await this.contract.startRound(userA, userB);
+        if (roundId) {
+            // Очищаем форму
+            document.getElementById('client-userA').value = '';
+            document.getElementById('client-userB').value = '';
+        }
+    }
+
+    async handleMakeDeposit() {
+        const roundId = document.getElementById('client-round-id').value;
+        const amount = document.getElementById('client-deposit-amount').value;
+
+        if (!roundId || !amount) {
+            this.auth.showError('Please enter round ID and amount');
+            return;
+        }
+
+        const success = await this.contract.makeDeposit(roundId, amount);
+        if (success) {
+            // Очищаем форму
+            document.getElementById('client-round-id').value = '';
+            document.getElementById('client-deposit-amount').value = '';
+        }
+    }
+
+    async handleDistributeRound() {
+        const roundId = document.getElementById('judge-round-id').value;
+
+        if (!roundId) {
+            this.auth.showError('Please enter round ID');
+            return;
+        }
+
+        const success = await this.contract.distributeRound(roundId);
+        if (success) {
+            document.getElementById('judge-round-id').value = '';
+        }
+    }
+
+    async handleDeployContract() {
+        const version = document.getElementById('contract-version').value;
+
+        const address = await this.contract.deployNewContract(version);
+        if (address) {
+            // Можно обновить интерфейс или показать информацию о новом контракте
+        }
+    }
+
+    async handleAddJudge() {
+        // Логика добавления судьи
+        this.auth.showInfo('Add judge functionality coming soon...');
+    }
+
+    async handleRemoveJudge() {
+        // Логика удаления судьи
+        this.auth.showInfo('Remove judge functionality coming soon...');
+    }
+
+    get web3() {
+        return this.auth.web3;
+    }
+
+
 }
 
 
