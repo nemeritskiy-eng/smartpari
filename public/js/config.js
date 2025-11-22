@@ -2,8 +2,8 @@
 const CONFIG = {
     CONTRACT_ADDRESSES: {
         '0x38': '0x6Fdd83A91A05035c4f4698A80599a51a687d7498', // BSC Mainnet
-        '0x61': 'YOUR_BSC_TESTNET_ADDRESS', // BSC Testnet
-        '0x1': 'YOUR_ETH_MAINNET_ADDRESS',  // Ethereum Mainnet
+        '0x61': '0x6Fdd83A91A05035c4f4698A80599a51a687d7498', // BSC Testnet
+        '0x1': '0x6Fdd83A91A05035c4f4698A80599a51a687d7498',  // Ethereum Mainnet
     },
     NETWORK_CONFIGS: {
         '0x38': {
