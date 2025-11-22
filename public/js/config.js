@@ -1,7 +1,7 @@
 
 const CONFIG = {
     CONTRACT_ADDRESSES: {
-        '0x38': 'YOUR_BSC_MAINNET_ADDRESS', // BSC Mainnet
+        '0x38': '0x6Fdd83A91A05035c4f4698A80599a51a687d7498', // BSC Mainnet
         '0x61': 'YOUR_BSC_TESTNET_ADDRESS', // BSC Testnet
         '0x1': 'YOUR_ETH_MAINNET_ADDRESS',  // Ethereum Mainnet
     },
@@ -30,15 +30,6 @@ const CONFIG = {
         JUDGE: 'judge',
         ADMIN: 'admin'
     }
-};
-
-const CONFIG = {
-    CONTRACT_ADDRESSES: {
-        '0x38': '0x...', // BSC Mainnet
-        '0x61': '0x...', // BSC Testnet
-        '0x1': '0x...',  // Ethereum Mainnet
-    },
-    // ... остальная конфигурация
 };
 
 const CONTRACT_ABI = [
