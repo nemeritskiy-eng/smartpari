@@ -10,10 +10,6 @@ class ClientPanel {
     }
 
     setupEventListeners() {
-        // Создание раунда
-        document.getElementById('client-start-round').addEventListener('click', () => {
-            this.handleStartRound();
-        });
 
         // Депозит
         document.getElementById('client-make-deposit').addEventListener('click', () => {
@@ -24,20 +20,6 @@ class ClientPanel {
         document.getElementById('client-refresh-rounds').addEventListener('click', () => {
             this.refreshRounds();
         });
-    }
-
-    async handleStartRound() {
-        const userA = document.getElementById('client-userA').value.trim();
-        const userB = document.getElementById('client-userB').value.trim();
-
-        if (!this.validateAddresses(userA, userB)) return;
-
-        const roundId = await this.contract.startRound(userA, userB);
-        if (roundId) {
-            this.clearForm('client-round-form');
-            await this.roundsManager.loadRoundDetails(roundId);
-            this.displayClientRounds();
-        }
     }
 
     async handleMakeDeposit() {

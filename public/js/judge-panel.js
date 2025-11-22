@@ -10,6 +10,11 @@ class JudgePanel {
     }
 
     setupEventListeners() {
+        // Создание раунда
+        document.getElementById('judge-start-round').addEventListener('click', () => {
+            this.handleStartRound();
+        });
+
         document.getElementById('judge-distribute').addEventListener('click', () => {
             this.handleDistributeRound();
         });
@@ -17,6 +22,26 @@ class JudgePanel {
         document.getElementById('judge-refresh').addEventListener('click', () => {
             this.refreshJudgeData();
         });
+    }
+
+    async handleStartRound() {
+        const userA = document.getElementById('client-userA').value.trim();
+        const userB = document.getElementById('client-userB').value.trim();
+
+        if (!this.validateAddresses(userA, userB)) return;
+
+        const roundId = await this.contract.startRound(userA, userB);
+        if (roundId) {
+            this.clearForm('judge-round-form');
+            await this.roundsManager.loadRoundDetails(roundId);
+        }
+    }
+
+    clearForm(formId) {
+        const form = document.getElementById(formId);
+        if (form) {
+            form.reset();
+        }
     }
 
     async handleDistributeRound() {
