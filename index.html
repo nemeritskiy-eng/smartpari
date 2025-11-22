@@ -1,104 +1,222 @@
+<!-- index.html -->
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Multi-Party Agreement DApp</title>
+    <title>Multi-Party Agreement Platform</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <style>
-        /* Добавим базовые стили */
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        button { margin: 5px; padding: 10px; }
-        input { margin: 5px; padding: 10px; width: 300px; }
-        .section { margin-bottom: 20px; padding: 10px; border: 1px solid #ccc; }
-    </style>
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-<h1>Multi-Party Agreement DApp</h1>
-
-<!-- Подключение кошелька -->
-<div class="section">
-    <button id="connect-wallet">Connect Wallet</button>
-    <div id="wallet-info" style="display: none;">
-        <p>Connected: <span id="wallet-address"></span></p>
-    </div>
-</div>
-
-<!-- Селектор сети -->
-<div class="network-selector">
-    <h3>🔗 Select Blockchain Network</h3>
-    <div id="network-options">
-        <div class="network-option" data-chain="0x38">
-            🟡 BNB Smart Chain (BSC)
+<!-- Навигация -->
+<nav id="navbar">
+    <div class="nav-container">
+        <div class="nav-brand">
+            <h2>🤝 Agreement Platform</h2>
         </div>
-        <div class="network-option" data-chain="0x1">
-            🔷 Ethereum Mainnet
-        </div>
-        <div class="network-option" data-chain="0x61">
-            🧪 BSC Testnet
-        </div>
-        <div class="network-option" data-chain="0x89">
-            🟣 Polygon Mainnet
+        <div class="nav-links">
+            <a href="#home" class="nav-link">Home</a>
+            <a href="#client" class="nav-link client-only">Client</a>
+            <a href="#judge" class="nav-link judge-only">Judge</a>
+            <a href="#admin" class="nav-link admin-only">Admin</a>
+            <div id="wallet-info" class="wallet-info"></div>
+            <button id="connect-wallet" class="btn-primary">Connect Wallet</button>
         </div>
     </div>
+</nav>
 
-    <div id="network-info" class="gas-info">
-        <p>Selected: <strong id="current-network">None</strong></p>
-        <p>Gas Price: <span id="current-gas-price">0</span> Gwei</p>
-        <p>Native Currency: <span id="native-currency">-</span></p>
+<!-- Основной контент -->
+<main id="main-content">
+    <!-- Страница загрузки -->
+    <div id="loading-page" class="page active">
+        <div class="loading-spinner"></div>
+        <p>Loading application...</p>
+    </div>
+
+    <!-- Главная страница -->
+    <div id="home-page" class="page">
+        <div class="hero-section">
+            <h1>Multi-Party Agreement Platform</h1>
+            <p>Secure and transparent smart contract agreements</p>
+        </div>
+
+        <div class="features-grid">
+            <div class="feature-card">
+                <h3>👤 For Clients</h3>
+                <p>Create agreements and manage your rounds</p>
+                <button class="btn-secondary goto-client">Go to Client Panel</button>
+            </div>
+
+            <div class="feature-card">
+                <h3>⚖️ For Judges</h3>
+                <p>Manage rounds and resolve disputes</p>
+                <button class="btn-secondary goto-judge">Go to Judge Panel</button>
+            </div>
+
+            <div class="feature-card">
+                <h3>🔧 For Admins</h3>
+                <p>Deploy contracts and manage platform</p>
+                <button class="btn-secondary goto-admin">Go to Admin Panel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Клиентская панель -->
+    <div id="client-page" class="page">
+        <div class="page-header">
+            <h2>👤 Client Panel</h2>
+            <p>Manage your agreement rounds</p>
+        </div>
+
+        <div class="client-sections">
+            <!-- Создание раунда -->
+            <section class="client-section">
+                <h3>Create New Round</h3>
+                <div class="form-group">
+                    <label>User A Address:</label>
+                    <input type="text" id="client-userA" placeholder="0x..." class="form-input">
+                </div>
+                <div class="form-group">
+                    <label>User B Address:</label>
+                    <input type="text" id="client-userB" placeholder="0x..." class="form-input">
+                </div>
+                <button id="client-start-round" class="btn-primary">Start Round</button>
+            </section>
+
+            <!-- Депозит -->
+            <section class="client-section">
+                <h3>Make Deposit</h3>
+                <div class="form-group">
+                    <label>Round ID:</label>
+                    <input type="number" id="client-round-id" placeholder="1" class="form-input">
+                </div>
+                <div class="form-group">
+                    <label>Amount (BNB):</label>
+                    <input type="number" id="client-deposit-amount" placeholder="0.1" step="0.001" class="form-input">
+                </div>
+                <button id="client-make-deposit" class="btn-primary">Make Deposit</button>
+            </section>
+
+            <!-- Мои раунды -->
+            <section class="client-section">
+                <h3>My Rounds</h3>
+                <div id="client-rounds-list" class="rounds-list">
+                    <!-- Список раундов будет здесь -->
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- Панель судьи -->
+    <div id="judge-page" class="page">
+        <div class="page-header">
+            <h2>⚖️ Judge Panel</h2>
+            <p>Manage and resolve agreement rounds</p>
+        </div>
+
+        <div class="judge-sections">
+            <!-- Активные раунды -->
+            <section class="judge-section">
+                <h3>Active Rounds</h3>
+                <div id="judge-active-rounds" class="rounds-list">
+                    <!-- Активные раунды для судьи -->
+                </div>
+            </section>
+
+            <!-- Распределение средств -->
+            <section class="judge-section">
+                <h3>Distribute Round</h3>
+                <div class="form-group">
+                    <label>Round ID:</label>
+                    <input type="number" id="judge-round-id" placeholder="1" class="form-input">
+                </div>
+                <button id="judge-distribute" class="btn-primary">Distribute Funds</button>
+            </section>
+
+            <!-- История решений -->
+            <section class="judge-section">
+                <h3>Decision History</h3>
+                <div id="judge-history" class="history-list">
+                    <!-- История решений судьи -->
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- Админ-панель -->
+    <div id="admin-page" class="page">
+        <div class="page-header">
+            <h2>🔧 Admin Panel</h2>
+            <p>Platform management and contract deployment</p>
+        </div>
+
+        <div class="admin-sections">
+            <!-- Развертывание контракта -->
+            <section class="admin-section">
+                <h3>Deploy New Contract</h3>
+                <div class="form-group">
+                    <label>Contract Version:</label>
+                    <select id="contract-version" class="form-input">
+                        <option value="v1">Version 1.0</option>
+                        <option value="v2">Version 2.0</option>
+                    </select>
+                </div>
+                <button id="admin-deploy-contract" class="btn-primary">Deploy Contract</button>
+                <div id="deploy-status" class="status-message"></div>
+            </section>
+
+            <!-- Управление судьями -->
+            <section class="admin-section">
+                <h3>Manage Judges</h3>
+                <div class="form-group">
+                    <label>Judge Address:</label>
+                    <input type="text" id="judge-address" placeholder="0x..." class="form-input">
+                </div>
+                <div class="button-group">
+                    <button id="admin-add-judge" class="btn-success">Add Judge</button>
+                    <button id="admin-remove-judge" class="btn-danger">Remove Judge</button>
+                </div>
+                <div id="judges-list" class="address-list">
+                    <!-- Список судей -->
+                </div>
+            </section>
+
+            <!-- Статистика платформы -->
+            <section class="admin-section">
+                <h3>Platform Statistics</h3>
+                <div id="platform-stats" class="stats-grid">
+                    <div class="stat-card">
+                        <h4>Total Rounds</h4>
+                        <span id="total-rounds">0</span>
+                    </div>
+                    <div class="stat-card">
+                        <h4>Active Rounds</h4>
+                        <span id="active-rounds">0</span>
+                    </div>
+                    <div class="stat-card">
+                        <h4>Total Value</h4>
+                        <span id="total-value">0 BNB</span>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+</main>
+
+<!-- Модальные окна -->
+<div id="modal-overlay" class="modal-overlay">
+    <div id="transaction-modal" class="modal">
+        <h3>Transaction in Progress</h3>
+        <div class="loading-spinner"></div>
+        <p id="transaction-message">Processing transaction...</p>
+        <a id="transaction-link" target="_blank" style="display: none;">View on Explorer</a>
     </div>
 </div>
 
-<div id="quick-fix-suggestions" style="display: none;"></div>
-
-<!-- Информация о BSC -->
-<div class="bsc-info" style="background: #f0f8ff; padding: 15px; border-radius: 10px; margin: 20px 0;">
-    <h3>🟡 Why BNB Smart Chain?</h3>
-    <ul>
-        <li>✅ Low transaction fees (~$0.10-0.50)</li>
-        <li>✅ Fast block time (3 seconds)</li>
-        <li>✅ EVM compatible (same as Ethereum)</li>
-        <li>✅ Large ecosystem and liquidity</li>
-    </ul>
-    <p><small>Need BNB? Buy on <a href="https://binance.com" target="_blank">Binance</a> or use a bridge</small></p>
-</div>
-</div>
-
-<!-- Взаимодействие с контрактом -->
-<div class="section">
-    <h3>Interact with Contract</h3>
-
-    <!-- Создание раунда -->
-    <div>
-        <h4>Start Round</h4>
-        <input type="text" id="userA" placeholder="User A Address">
-        <input type="text" id="userB" placeholder="User B Address">
-        <button id="start-round-btn">Start Round</button>
-    </div>
-
-    <!-- Депозит -->
-    <div>
-        <h4>Make Deposit</h4>
-        <input type="number" id="round-id" placeholder="Round ID">
-        <input type="number" id="deposit-amount" placeholder="Amount in ETH">
-        <button id="make-deposit-btn">Deposit</button>
-    </div>
-
-    <!-- Проверка статуса раунда -->
-    <div>
-        <h4>Check Round</h4>
-        <input type="number" id="check-round-id" placeholder="Round ID">
-        <button id="check-round-btn">Check Round</button>
-        <div id="round-details"></div>
-    </div>
-</div>
-
-<!-- Подключаем Web3 -->
 <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
-<!-- Подключаем данные контракта -->
-<script src="./js/contractData.js"></script>
-<script src="./js/networks-config.js"></script>
-<script src="./js/config.js"></script>
-<!-- Наш основной код -->
-<script src="./js/app.js"></script>
+<script src="js/config.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/contract.js"></script>
+<script src="js/app_bak.js"></script>
 </body>
 </html>

@@ -1,179 +1,177 @@
-// Глобальные переменные
-let web3;
-let currentAccount;
-let currentContractAddress = null;
+// js/app.js - обновленная версия
+class MultiPartyApp {
+    constructor() {
+        this.auth = new AuthManager();
+        this.contract = new ContractManager(this.auth);
+        this.roleManager = new RoleManager(this.auth, this.contract);
+        this.roundsManager = new RoundsManager(this.auth, this.contract);
+        this.clientPanel = new ClientPanel(this);
+        this.judgePanel = new JudgePanel(this);
 
-// Элементы интерфейса
-const connectWalletBtn = document.getElementById('connect-wallet');
-const walletInfoDiv = document.getElementById('wallet-info');
-const walletAddressSpan = document.getElementById('wallet-address');
+        this.currentPage = 'home';
 
-const contractAddressInput = document.getElementById('contract-address');
-const currentContractDiv = document.getElementById('current-contract');
-const deployStatusDiv = document.getElementById('deploy-status');
+        // Связываем AuthManager с приложением
+        this.auth.app = this;
 
-const startRoundBtn = document.getElementById('start-round-btn');
-const userAInput = document.getElementById('userA');
-const userBInput = document.getElementById('userB');
+        this.init();
+    }
 
-const makeDepositBtn = document.getElementById('make-deposit-btn');
-const roundIdInput = document.getElementById('round-id');
-const depositAmountInput = document.getElementById('deposit-amount');
+    async init() {
+        await this.auth.init();
+        await this.contract.init();
+        await this.roleManager.loadRoleData();
+        await this.roundsManager.init();
 
-const checkRoundBtn = document.getElementById('check-round-btn');
-const checkRoundIdInput = document.getElementById('check-round-id');
-const roundDetailsDiv = document.getElementById('round-details');
+        this.setupNavigation();
+        this.setupEventListeners();
+        this.showPage('home');
 
-// Инициализация при загрузке
-window.addEventListener('load', async () => {
-    // Проверяем, установлен ли Web3 провайдер (MetaMask)
-    if (typeof window.ethereum !== 'undefined') {
-        web3 = new Web3(window.ethereum);
+        // Скрываем страницу загрузки
+        document.getElementById('loading-page').classList.remove('active');
 
-        const savedAddress = '0x6Fdd83A91A05035c4f4698A80599a51a687d7498';
-        if (savedAddress) {
-            currentContractAddress = savedAddress;
+        console.log('🚀 Multi-Party Agreement Platform initialized');
+    }
 
-            contractAddressInput.value = savedAddress;
+    // ... остальные методы остаются такими же ...
+
+    async loadPageData(pageName) {
+        switch (pageName) {
+            case 'client':
+                await this.loadClientData();
+                break;
+            case 'judge':
+                await this.loadJudgeData();
+                break;
+            case 'admin':
+                await this.loadAdminData();
+                break;
+        }
+    }
+
+    async loadClientData() {
+        this.clientPanel.displayClientRounds();
+    }
+
+    async loadJudgeData() {
+        this.judgePanel.displayJudgeRounds();
+        this.judgePanel.displayJudgeHistory();
+    }
+
+    async loadAdminData() {
+        await this.loadAdminStats();
+        this.displayJudgesList();
+        this.displayAdminsList();
+    }
+
+    async loadAdminStats() {
+        const stats = this.roundsManager.getPlatformStats();
+
+        document.getElementById('total-rounds').textContent = stats.totalRounds;
+        document.getElementById('active-rounds').textContent = stats.activeRounds;
+        document.getElementById('completed-rounds').textContent = stats.completedRounds;
+        document.getElementById('total-value').textContent = stats.totalValue + ' BNB';
+    }
+
+    displayJudgesList() {
+        const container = document.getElementById('judges-list');
+        const judges = this.roleManager.getJudgesList();
+
+        if (judges.length === 0) {
+            container.innerHTML = '<p>No judges added yet.</p>';
+            return;
         }
 
-        // Проверяем, подключены ли уже аккаунты
-        const accounts = await web3.eth.getAccounts();
-        if (accounts.length > 0) {
-            currentAccount = accounts[0];
-            updateWalletInfo();
+        const judgesHTML = judges.map(judge => `
+            <div class="address-item">
+                <span class="address">${this.auth.formatAddress(judge)}</span>
+                <button class="btn-danger btn-sm"
+                        onclick="app.removeJudge('${judge}')">
+                    Remove
+                </button>
+            </div>
+        `).join('');
+
+        container.innerHTML = judgesHTML;
+    }
+
+    displayAdminsList() {
+        const container = document.getElementById('admins-list');
+        const admins = this.roleManager.getAdminsList();
+
+        if (admins.length === 0) {
+            container.innerHTML = '<p>No additional admins added.</p>';
+            return;
         }
-    } else {
-        alert('Please install MetaMask to use this DApp.');
-    }
-});
 
-// Подключение кошелька
-connectWalletBtn.addEventListener('click', async () => {
-    if (!web3) {
-        alert('Web3 not initialized. Please refresh the page.');
-        return;
+        const adminsHTML = admins.map(admin => `
+            <div class="address-item">
+                <span class="address">${this.auth.formatAddress(admin)}</span>
+                ${admin !== this.auth.currentAccount.toLowerCase() ? `
+                    <button class="btn-danger btn-sm"
+                            onclick="app.removeAdmin('${admin}')">
+                        Remove
+                    </button>
+                ` : '<span class="badge">Current</span>'}
+            </div>
+        `).join('');
+
+        container.innerHTML = adminsHTML;
     }
 
-    try {
-        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-        currentAccount = accounts[0];
-        updateWalletInfo();
-    } catch (error) {
-        console.error('Error connecting wallet:', error);
-    }
-});
+    async addJudge() {
+        const address = document.getElementById('judge-address').value.trim();
+        if (!address) {
+            this.auth.showError('Please enter judge address');
+            return;
+        }
 
-function updateWalletInfo() {
-    walletAddressSpan.textContent = currentAccount;
-    walletInfoDiv.style.display = 'block';
-    connectWalletBtn.style.display = 'none';
+        const success = await this.roleManager.addJudge(address);
+        if (success) {
+            document.getElementById('judge-address').value = '';
+            this.displayJudgesList();
+
+            // Если добавленный судья - текущий пользователь, обновляем роль
+            if (address.toLowerCase() === this.auth.currentAccount.toLowerCase()) {
+                await this.auth.loadUserProfile();
+            }
+        }
+    }
+
+    async removeJudge(address) {
+        const success = await this.roleManager.removeJudge(address);
+        if (success) {
+            this.displayJudgesList();
+        }
+    }
+
+    async addAdmin() {
+        const address = document.getElementById('admin-address').value.trim();
+        if (!address) {
+            this.auth.showError('Please enter admin address');
+            return;
+        }
+
+        const success = await this.roleManager.addAdmin(address);
+        if (success) {
+            document.getElementById('admin-address').value = '';
+            this.displayAdminsList();
+        }
+    }
+
+    async removeAdmin(address) {
+        // Не позволяем удалить самого себя
+        if (address.toLowerCase() === this.auth.currentAccount.toLowerCase()) {
+            this.auth.showError('You cannot remove yourself as admin');
+            return;
+        }
+
+        const success = await this.roleManager.removeAdmin(address);
+        if (success) {
+            this.displayAdminsList();
+        }
+    }
+
+    get web3() {
+        return this.auth.web3;
+    }
 }
-
-// Запуск раунда
-startRoundBtn.addEventListener('click', async () => {
-    if (!currentContractAddress) {
-        alert('Please set contract address first');
-        return;
-    }
-
-    if (!currentAccount) {
-        alert('Please connect wallet first');
-        return;
-    }
-
-    const userA = userAInput.value.trim();
-    const userB = userBInput.value.trim();
-
-    if (!web3.utils.isAddress(userA) || !web3.utils.isAddress(userB)) {
-        alert('Invalid addresses');
-        return;
-    }
-
-    try {
-        const contract = new web3.eth.Contract(contractABI, currentContractAddress);
-        const result = await contract.methods.startRound(userA, userB).send({
-            from: currentAccount
-        });
-
-        alert(`Round started! Round ID: ${result.events.RoundStarted.returnValues.roundId}`);
-    } catch (error) {
-        console.error('Error starting round:', error);
-        alert('Error starting round: ' + error.message);
-    }
-});
-
-// Депозит
-makeDepositBtn.addEventListener('click', async () => {
-    if (!currentContractAddress) {
-        alert('Please set contract address first');
-        return;
-    }
-
-    if (!currentAccount) {
-        alert('Please connect wallet first');
-        return;
-    }
-
-    const roundId = roundIdInput.value;
-    const amountETH = depositAmountInput.value;
-
-    if (!roundId || !amountETH) {
-        alert('Please enter round ID and amount');
-        return;
-    }
-
-    try {
-        const amountWei = web3.utils.toWei(amountETH, 'ether');
-        const contract = new web3.eth.Contract(contractABI, currentContractAddress);
-
-        const result = await contract.methods.deposit(roundId).send({
-            from: currentAccount,
-            value: amountWei
-        });
-
-        alert('Deposit successful!');
-    } catch (error) {
-        console.error('Error making deposit:', error);
-        alert('Error making deposit: ' + error.message);
-    }
-});
-
-// Проверка раунда
-checkRoundBtn.addEventListener('click', async () => {
-    if (!currentContractAddress) {
-        alert('Please set contract address first');
-        return;
-    }
-
-    const roundId = checkRoundIdInput.value;
-    if (!roundId) {
-        alert('Please enter round ID');
-        return;
-    }
-
-    try {
-        const contract = new web3.eth.Contract(contractABI, currentContractAddress);
-        const status = await contract.methods.getRoundStatus(roundId).call();
-        const deposits = await contract.methods.getRoundDeposits(roundId).call();
-
-        const details = `
-            <p><strong>User A:</strong> ${status.userA}</p>
-            <p><strong>User B:</strong> ${status.userB}</p>
-            <p><strong>User C:</strong> ${status.userC}</p>
-            <p><strong>Amount A:</strong> ${web3.utils.fromWei(status.amountA, 'ether')} ETH</p>
-            <p><strong>Amount B:</strong> ${web3.utils.fromWei(status.amountB, 'ether')} ETH</p>
-            <p><strong>Amount C:</strong> ${web3.utils.fromWei(status.amountC, 'ether')} ETH</p>
-            <p><strong>Deposited A:</strong> ${deposits.depositedA ? 'Yes' : 'No'}</p>
-            <p><strong>Deposited B:</strong> ${deposits.depositedB ? 'Yes' : 'No'}</p>
-            <p><strong>Deposited C:</strong> ${deposits.depositedC ? 'Yes' : 'No'}</p>
-            <p><strong>Completed:</strong> ${status.completed ? 'Yes' : 'No'}</p>
-            <p><strong>Refunded:</strong> ${status.refunded ? 'Yes' : 'No'}</p>
-        `;
-
-        roundDetailsDiv.innerHTML = details;
-    } catch (error) {
-        console.error('Error checking round:', error);
-        alert('Error checking round: ' + error.message);
-    }
-});
